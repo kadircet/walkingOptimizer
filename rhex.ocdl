@@ -1,0 +1,1402 @@
+/* rhex.cdl
+ *
+ * $Id: rhex.cdl,v 1.7 2004/04/26 06:59:10 gch Exp $
+ *
+ * This file is part of the RiSE Simulation Library
+ *  Copyright (c) 2003 
+ *    Regents of The University of Michigan,
+ *    Carnegie Mellon University,
+ *    Stanford University
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the RiSE Simulator License version
+ * 1.0. You should have received a copy of this license along with
+ * this program; if not, write to <ulucs+risesim@cs.cmu.edu>.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * LICENSE file for more details.  */
+
+
+//
+// leg_segment macro -- no arguments
+//
+
+
+
+//
+// make_leg macro -- one argument, string name of leg
+//
+
+
+Camera(1.6,0.5,0.1);
+Gravity(0,0,-10);
+
+DefineSurface("default") : (elasticity = 0.01, static = 10.0, viscous = 20.0);
+
+var rhex_w = 0.22; // only including center block
+var rhex_l = 0.42; 
+var rhex_h = 0.12;
+var rhex_r = 0.06; // cylinders on either end
+var rad = 0.01; // generic smoothing
+
+var hip_w = 0.04;
+
+var leg_offset = 0.18; // need clearance for leg_r below
+
+var segment_k = 500;
+var segment_d = 4000;
+
+var joint_inertia = 0.005;
+
+var leg_w = 0.02;
+var leg_h = 0.005;
+var leg_r = 0.15 / 2;
+var leg_rad = 0.004; // this can be modified
+
+var NUM_SEGS = 9;
+var angle = pi / NUM_SEGS;
+var seg_l = leg_r * 2 * sin ( angle / 2 ) * 0.9;
+
+// make the ground
+Translation(0,0,-0.3) {
+  var blocksize = 1.00;
+var blockheight = 0.01;
+var numblock = 10;
+
+
+
+
+
+
+Rotation(1,0,0,-0.0) {       
+Translation(-numblock*blocksize / 2,
+            -1.5,#(numblock%20)*blocksize / 2,
+            0)  
+{
+  
+  Translation(blocksize*0*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*0*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*0*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*0*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*0*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*0*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*0*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*0*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*0*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*0*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*0*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*1*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*2*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*3*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*4*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*5*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*6*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*7*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*8*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*9*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*0*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*1*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*2*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*3*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*4*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*5*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*6*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*7*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*8*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*9*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*10*2,blocksize*10*2,0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  
+  Translation(blocksize*(0*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(0*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(0*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(0*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(0*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(0*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(0*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(0*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(0*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(0*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(0*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(1*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(2*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(3*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(4*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(5*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(6*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(7*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(8*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(9*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  Translation(blocksize*(10*2+1),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="black");
+  
+  Translation(blocksize*(0*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(0*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(1*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(2*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(3*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(4*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(5*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(6*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(7*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(8*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(9*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2),blocksize*(10*2+1),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  
+  Translation(blocksize*(0*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(0*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(1*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(2*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(3*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(4*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(5*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(6*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(7*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(8*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(9*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(0*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(1*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(2*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(3*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(4*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(5*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(6*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(7*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(8*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(9*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+  Translation(blocksize*(10*2+1),blocksize*(10*2),0), 
+    Block(blocksize,blocksize,blockheight) : (color="green");
+
+}
+}
+
+}
+
+// make the robot
+Rotation(0,0,1,pi),
+FreeBody, 
+Translation(0,0,0) { // robot coordinate frame
+ Block( rhex_w, rhex_l, rhex_h, rad ) : (color="blue", mass = 8, name="RHex") {
+  
+  Translation( 0, -rhex_l / 2, 0 ),
+    Rotation( 0,1,0, pi/2),
+    Cylinder( rhex_w, rhex_r, rad) : (color="blue");
+
+  Translation( 0, rhex_l / 2, 0 ),
+    Rotation( 0,1,0, pi/2),
+    Cylinder( rhex_w, rhex_r, rad) : (color="blue");
+
+
+  // right side of body
+  Translation( rhex_w / 2 + hip_w , -leg_offset, 0),
+    
+    Rotation( 0,-1,0, pi/2),
+    RevoluteJoint(-3/8 * pi) : (name = "hip0", damping = 10, inertia = joint_inertia),
+#    RevoluteJoint(0 * pi) : (name = "hip0", damping = 10, inertia = joint_inertia),
+    Cylinder( hip_w, hip_w / 2 ),
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ), 
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle );
+
+  Translation( rhex_w / 2 + hip_w * 2, 0, 0 ),
+    
+    Rotation( 0,-1,0, pi/2),
+    RevoluteJoint(-3/8 * pi) : (name = "hip1", damping = 10, inertia = joint_inertia),
+#    RevoluteJoint(0 * pi) : (name = "hip1", damping = 10, inertia = joint_inertia),
+    Cylinder( hip_w, hip_w / 2 ),
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ), 
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle );
+
+  Translation( rhex_w / 2 + hip_w, leg_offset, 0),
+    
+    Rotation( 0,-1,0, pi/2),
+    RevoluteJoint(-3/8 * pi) : (name = "hip2", damping = 10, inertia = joint_inertia),
+#    RevoluteJoint(0 * pi) : (name = "hip2", damping = 10, inertia = joint_inertia),
+    Cylinder( hip_w, hip_w / 2 ),
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ), 
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle );
+
+  // left side of body
+  Translation( -rhex_w / 2 - hip_w, -leg_offset, 0),
+    
+    Rotation( 0,-1,0, pi/2),
+    RevoluteJoint(-3/8 * pi) : (name = "hip3", damping = 10, inertia = joint_inertia),
+#    RevoluteJoint(0 * pi) : (name = "hip3", damping = 10, inertia = joint_inertia),
+    Cylinder( hip_w, hip_w / 2 ),
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ), 
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle );
+
+  Translation( -rhex_w / 2 - hip_w * 2, 0, 0 ),
+    
+    Rotation( 0,-1,0, pi/2),
+    RevoluteJoint(-3/8 * pi) : (name = "hip4", damping = 10, inertia = joint_inertia),
+#    RevoluteJoint(0 * pi) : (name = "hip4", damping = 10, inertia = joint_inertia),
+    Cylinder( hip_w, hip_w / 2 ),
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ), 
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle );
+
+  Translation( -rhex_w / 2 - hip_w, leg_offset, 0),
+    
+    Rotation( 0,-1,0, pi/2),
+    RevoluteJoint(-3/8 * pi) : (name = "hip5", damping = 10, inertia = joint_inertia),
+#    RevoluteJoint(0 * pi) : (name = "hip5", damping = 10, inertia = joint_inertia),
+    Cylinder( hip_w, hip_w / 2 ),
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+
+    
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ),
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle ), 
+Translation( 0, seg_l / 2, 0 ),
+  Block( leg_h, seg_l, leg_w, leg_rad) : (color = "yellow", mass = 0.01),
+  Translation( 0, seg_l / 2, 0 ),
+  Rotation( 0,0,1, angle );
+
+  }
+}
+
+LookAt("RHex");
+Camera("RHex", 1.0, 0.8, 0.4);
+//RenderFile("rhex/rhex");
