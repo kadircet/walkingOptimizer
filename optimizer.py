@@ -4,6 +4,8 @@ from dyExt import *
 import time
 import numpy
 from numpy import array
+import pickle
+import os
 
 a = [[array([ 0.5603125,  0.2140625,  0.1925   ,  0.1303125]), 1.3133382155107036], [array([ 0.47828125,  0.31015625,  0.28625   ,  0.13578125]), 1.7078600626103295], [array([ 0.34 ,  0.275,  0.33 ,  0.185]), 2.8181672657131087], [array([ 0.39625,  0.20625,  0.38   ,  0.24125]), 2.830223576766543], [array([ 0.48306641,  0.27705078,  0.18078125,  0.20462891]), 1.357284867282448]]
 
@@ -83,8 +85,8 @@ def nelder_mead(f, x_start,
 	prev_best = f(x_start)
 	no_improv = 0
 	res = [[x_start, prev_best]]
-	res = [[array([ 0.5603125,  0.2140625,  0.1925   ,  0.1303125]), 1.3133382155107036], [array([ 0.47828125,  0.31015625,  0.28625   ,  0.13578125]), 1.7078600626103295], [array([ 0.34 ,  0.275,  0.33 ,  0.185]), 2.8181672657131087], [array([ 0.39625,  0.20625,  0.38   ,  0.24125]), 2.830223576766543], [array([ 0.48306641,  0.27705078,  0.18078125,  0.20462891]), 1.357284867282448]]
-
+        if os.path.isfile("session.p"):
+                res = pickle.load(open("session.p", "rb"))
 	for i in range(dim-len(res)+1):
 		x = copy.copy(x_start)
 		x[i] = x[i] + step
@@ -94,9 +96,9 @@ def nelder_mead(f, x_start,
 	# simplex iter
 	iters = 0
 	while 1:
-		print res
 		# order
 		res.sort(key=lambda x: x[1])
+		pickle.dump(res, open("session.p", "wb"))
 		best = res[0][1]
 
 		# break after max_iter
@@ -159,8 +161,6 @@ def nelder_mead(f, x_start,
 			score = f(redx)
 			nres.append([redx, score])
 		res = nres
-	res.sort(key=lambda x: x[1])
-	return res
 	
 def optimizer(argv):
 	dy.init()
