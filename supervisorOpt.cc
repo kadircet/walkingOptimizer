@@ -11,6 +11,7 @@
 #include "modules/SitMachine.hh"
 #include "modules/AvgPower.hh"
 #define SIMTIME 5.
+#define NETWORKINTERVAL .1
 
 extern bool __printData;
 
@@ -43,17 +44,9 @@ public:
 };
 
 WalkParam_t newp, orgp;
-struct point
-{
-	float x,y,z;
-	
-	float operator-(const point &rhs)
-	{
-		return sqrt((x-rhs.x)*(x-rhs.x)+(y-rhs.y)*(y-rhs.y)+(z-rhs.z)*(z-rhs.z));
-	}
-};
 
-void pushDY();
+DyData *dppuase, *avgpower, *paramstested, *paramschanged, *tripodtime,
+	*standadjtime, *smooth, *speed, *turn, *cpgperiod;
 
 class mySup : public Module
 {
@@ -69,10 +62,12 @@ public:
 		avgpwr	= (APModule *)MMFindModule(APMODULE_NAME, 0);
 		lock	= false;
 		state	= 0;
-		dstate= 0;
+		dstate	= 0;
 		calibrated = false;
 		walk->getParams(&newp);
 		walk->getParams(&orgp);
+		lastpull= MMReadTime();
+		
 		__printData=true;
 	}
 	void uninit ( void ) {};
@@ -80,6 +75,7 @@ public:
 	void deactivate ( void ) {};
 	void update()
 	{
+		//pullDY();
 		if(state==0 && !calibrated)//calibrate
 		{
 			if(!lock)
@@ -125,9 +121,6 @@ public:
 		{
 			if(readyToWalk() && walk->getOwner()!=this)
 			{
-				dy_data_set_float(dy_data_retrieve("robot.walking.paramsChanged"), .0);
-				start = getPosition();
-				organg = getAngle();
 				MMReleaseModule(stand, this);
 				MMGrabModule(walk, this);
 				getWalkParams(&newp);
@@ -140,33 +133,23 @@ public:
 			}
 			if(state==2 && MMReadTime()-mark>SIMTIME)
 				state=3;
-			
-			if(hasPaused())
-			{
-				lock=false;
-				state=1;
-				if(walk->getOwner()==this)
-				{
-					MMReleaseModule(walk, this);
-					MMGrabModule(stand, this);
-				}
-			}
 		}
 		else if(state==3)//turn back
 		{
 			if(!lock)
 			{
-				dy_data_set_float(dy_data_retrieve("robot.avgpower"), avgpwr->getPower());
-				dy_data_set_float(dy_data_retrieve("robot.avgspeed"), (getPosition()-start)/SIMTIME);
-				dy_data_set_float(dy_data_retrieve("robot.paramstested"), 1.);
+				dy_data_set_float(avgpower, avgpwr->getPower());
+				dy_data_set_float(paramstested, 1.);
+				pushDY();
 				lock=true;
 				walk->setSpeedCommand(.0);
 				walk->setParams(&orgp);
 			}
 			else
 			{
-				point pos = getPosition();
-				if(turnTo(atan2(start.x-pos.x, start.y-pos.y)+M_PI) && goTo(start) && turnTo(organg.z))
+				walk->setSpeedCommand(dy_data_get_float(speed));
+				walk->setTurnCommand(dy_data_get_float(turn));
+				if(readyToWalk())
 				{
 					lock = false;
 					if(walk->getOwner()==this)
@@ -177,93 +160,68 @@ public:
 					state=1;
 				}
 			}
-			
-			if(hasPaused())
+		}
+		if(hasPaused())
+		{
+			lock=false;
+			state=1;
+			if(walk->getOwner()==this)
 			{
-				lock=false;
-				state=1;
-				if(walk->getOwner()==this)
-				{
-					MMReleaseModule(walk, this);
-					MMGrabModule(stand, this);
-				}
+				MMReleaseModule(walk, this);
+				MMGrabModule(stand, this);
 			}
 		}
-
-		pushDY();
 	}
 private:
 	bool readyToWalk()
 	{
-		return (bool)dy_data_get_float(dy_data_retrieve("robot.walking.paramsChanged")) 
-			&& !(bool)dy_data_get_float(dy_data_retrieve("robot.pause"));
+		return (bool)dy_data_get_float(paramschanged) 
+			&& !(bool)dy_data_get_float(dppuase);
 	}
 	
 	bool hasPaused()
 	{
-		return (bool)dy_data_get_float(dy_data_retrieve("robot.pause"));
-	}
-	
-	point getPosition()
-	{
-		point p;
-		p.x = dy_data_get_float(dy_data_retrieve("robot.position.x"));
-		p.y = dy_data_get_float(dy_data_retrieve("robot.position.y"));
-		p.z = dy_data_get_float(dy_data_retrieve("robot.position.z"));
-		return p;
-	}
-	
-	point getAngle()
-	{
-		point p;
-		p.x = dy_data_get_float(dy_data_retrieve("robot.angle.x"));
-		p.y = dy_data_get_float(dy_data_retrieve("robot.angle.y"));
-		p.z = dy_data_get_float(dy_data_retrieve("robot.angle.z"));
-		return p;
+		return (bool)dy_data_get_float(dppuase);
 	}
 	
 	void getWalkParams(WalkParam_t *wp)
 	{
-		wp->tripodTime = dy_data_get_double(dy_data_retrieve("robot.walking.params.tripodTime"));
-		wp->standAdjTime = dy_data_get_double(dy_data_retrieve("robot.walking.params.standAdjTime"));
-		wp->cpgPeriod = dy_data_get_double(dy_data_retrieve("robot.walking.params.cpgPeriod"));
-		wp->smooth = dy_data_get_float(dy_data_retrieve("robot.walking.params.smooth"));
+		pullDY(true);
+		wp->tripodTime = dy_data_get_float(tripodtime);
+		wp->standAdjTime = dy_data_get_float(standadjtime);
+		wp->cpgPeriod = dy_data_get_float(cpgperiod);
+		wp->smooth = dy_data_get_float(smooth);
 	}
 	
-	bool turnTo(float theta)
+	void pullDY(bool pullParams=false)
 	{
-		return true;
-		while(theta>M_PI*2)
-			theta-=M_PI*2;
-		while(theta<-M_PI*2)
-			theta+=M_PI*2;
-		point ang = getAngle();
-		if(fabs(ang.z-theta)>.05)
+		if(MMReadTime()-lastpull<NETWORKINTERVAL)
+			return;
+		
+		lastpull = MMReadTime();
+		if(pullParams)
 		{
-			walk->setTurnCommand(1.*(ang.z>theta?-1:1));
-			return false;
+			dy_network_pull("robot.walking.params.tripodTime");
+			dy_network_pull("robot.walking.params.standAdjTime");
+			dy_network_pull("robot.walking.params.cpgPeriod");
+			dy_network_pull("robot.walking.params.smooth");
+			
+			dy_data_set_float(paramschanged, .0);
+			dy_network_push("robot.walking.paramsChanged");
 		}
 		else
 		{
-			walk->setTurnCommand(.0);
-			return true;
+			dy_network_pull("robot.walking.paramsChanged");
+			dy_network_pull("robot.pause");
+			dy_network_pull("robot.walking.speed");
+			dy_network_pull("robot.walking.turn");
 		}
 	}
-	
-	bool goTo(point target)
+
+	void pushDY()
 	{
-		point pos = getPosition();
-		if(fabs(pos.y-target.y)>.03)
-		//if(fabs(pos.x-target.x)+fabs(pos.y-target.y)+fabs(pos.z-target.z)>.03)
-		{
-			walk->setSpeedCommand(-1.);
-			return false;
-		}
-		else
-		{
-			walk->setSpeedCommand(.0);
-			return true;
-		}
+		dy_network_push("robot.avgpower");
+		dy_network_push("robot.paramstested");
 	}
 	
 	CalibMachine *calib[6];
@@ -273,63 +231,28 @@ private:
 	APModule *avgpwr;
 	bool lock, calibrated;
 	int dstate,state;
-	unsigned int mark;
-	point start, organg;
+	unsigned int mark, lastpull;
 };
 
-void pullDY()
-{
-	dy_network_pull("robot.position.x");
-	dy_network_pull("robot.position.y");
-	dy_network_pull("robot.position.z");
-	dy_network_pull("robot.angle.x");
-	dy_network_pull("robot.angle.y");
-	dy_network_pull("robot.angle.z");
-	dy_network_pull("robot.walking.paramsChanged");
-	dy_network_pull("robot.walking.params.tripodTime");
-	dy_network_pull("robot.walking.params.standAdjTime");
-	dy_network_pull("robot.walking.params.cpgPeriod");
-	dy_network_pull("robot.walking.params.smooth");
-	dy_network_pull("robot.pause");
-}
-
-void pushDY()
-{
-	dy_network_push("robot.position.x");
-	dy_network_push("robot.position.y");
-	dy_network_push("robot.position.z");
-	dy_network_push("robot.angle.x");
-	dy_network_push("robot.angle.y");
-	dy_network_push("robot.angle.z");
-	dy_network_push("robot.walking.paramsChanged");
-	dy_network_push("robot.walking.params.tripodTime");
-	dy_network_push("robot.walking.params.standAdjTime");
-	dy_network_push("robot.walking.params.cpgPeriod");
-	dy_network_push("robot.walking.params.smooth");
-	dy_network_push("robot.avgpower");
-	dy_network_push("robot.avgspeed");
-	dy_network_push("robot.paramstested");
-	dy_network_push("robot.pause");
-}
-
 void startDY()
-{	
+{
 	dy_init(0, NULL);
+	dy_data_set_float(paramschanged=dy_data_create(DY_FLOAT, "robot.walking.paramsChanged"), 0);
+	dy_data_set_float(tripodtime=dy_data_create(DY_FLOAT, "robot.walking.params.tripodTime"), WALK_TRIPODTIME_DFLT);
+	dy_data_set_float(standadjtime=dy_data_create(DY_FLOAT, "robot.walking.params.standAdjTime"), WALK_ADJTIME_DFLT);
+	dy_data_set_float(cpgperiod=dy_data_create(DY_FLOAT, "robot.walking.params.cpgPeriod"), WALK_CPGPERIOD_DFLT);
+	dy_data_set_float(smooth=dy_data_create(DY_FLOAT, "robot.walking.params.smooth"), WALK_SMOOTH_DFLT);
+	dy_data_set_float(avgpower=dy_data_create(DY_FLOAT, "robot.avgpower"), 0);
+	dy_data_set_float(speed=dy_data_create(DY_FLOAT, "robot.walking.speed"), 0);
+	dy_data_set_float(turn=dy_data_create(DY_FLOAT, "robot.walking.turn"), 0);
+	dy_data_set_float(paramstested=dy_data_create(DY_FLOAT, "robot.paramstested"), 0);
+	dy_data_set_float(dppuase=dy_data_create(DY_FLOAT, "robot.pause"), 0);
 	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.position.x"), 0);
 	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.position.y"), 0);
 	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.position.z"), 0);
 	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.angle.x"), 0);
 	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.angle.y"), 0);
 	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.angle.z"), 0);
-	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.walking.paramsChanged"), 0);
-	dy_data_set_double(dy_data_create(DY_DOUBLE, "robot.walking.params.tripodTime"), WALK_TRIPODTIME_DFLT);
-	dy_data_set_double(dy_data_create(DY_DOUBLE, "robot.walking.params.standAdjTime"), WALK_ADJTIME_DFLT);
-	dy_data_set_double(dy_data_create(DY_DOUBLE, "robot.walking.params.cpgPeriod"), WALK_CPGPERIOD_DFLT);
-	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.walking.params.smooth"), WALK_SMOOTH_DFLT);
-	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.avgpower"), 0);
-	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.avgspeed"), 0);
-	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.paramstested"), 0);
-	dy_data_set_float(dy_data_create(DY_FLOAT, "robot.pause"), 0);
 }
 
 int main( int argc, char** argv )

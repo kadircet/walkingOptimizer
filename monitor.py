@@ -74,7 +74,6 @@ def main(argv):
 	tree.heading('Value', text='Value')
 	tree.pack(fill=tk.BOTH, expand=1)
 	root.after(1000, refresh)
-	print "hop"
 	root.mainloop()
 
 import sys

@@ -104,6 +104,16 @@ void pushRot(float roll, float pitch, float yaw)
 	dy_data_set_float(dy_data_retrieve("robot.angle.z"), yaw);
 }
 
+void pushAll()
+{
+	dy_network_push("robot.angle.x");
+	dy_network_push("robot.angle.y");
+	dy_network_push("robot.angle.z");
+	dy_network_push("robot.position.x");
+	dy_network_push("robot.position.y");
+	dy_network_push("robot.position.z");
+}
+
 void sendFrameData(const MocapFrame &frame)
 {
 	std::vector<RigidBody> bodies=frame.rigidBodies();
@@ -115,6 +125,7 @@ void sendFrameData(const MocapFrame &frame)
 		float pitch = atan2(2*ori.qx*ori.qw - 2*ori.qy*ori.qz, 1 - 2*ori.qx*ori.qx - 2*ori.qz*ori.qz);
 		float yaw   = asin(2*ori.qx*ori.qy + 2*ori.qz*ori.qw);
 		pushRot(roll, pitch, yaw);
+		pushAll();
 	}
 }
 
@@ -135,7 +146,7 @@ void printFrames(FrameListener& frameListener)
             break;
          std::cout << frame << std::endl;
          
-         sendFrameData(frame);
+		 sendFrameData(frame);
       }
       
       // Sleep for a little while to simulate work :)
@@ -203,6 +214,9 @@ void timeStats(FrameListener& frameListener, const float diffMin_ms = 0.5, const
 void startDY()
 {
 	dy_init(0, NULL);
+	dy_network_connect("192.168.2.51", 8650);
+	std::cout << "Waiting for variables..." << std::endl;
+	sleep(1);
 }
 
 int main(int argc, char* argv[])

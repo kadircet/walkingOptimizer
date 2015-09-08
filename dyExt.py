@@ -1,6 +1,8 @@
 import dy
+from time import time
 import ctypes
 
+NETWORKINTERVAL = .1
 def typetostr(dtype):
 	if dtype == dy.DY_INT8:
 		return "DY_INT8"
@@ -20,11 +22,12 @@ def typetostr(dtype):
 		return "DY_DOUBLE"
 		
 class dyData:
-	def __init__(self, name, data=None, dtype=None):
+	def __init__(self, name, data=None, dtype=dy.DY_FLOAT):
 		self.name = name
 		self.data = data
 		self.dataP = dy.data.retrieve(name)
-		if bool(self.dataP)==0:
+		self.lastget=self.lastset=time()-.5
+                if bool(self.dataP)==0:
 			self.dataP=dy.data.create(dtype, name)
 		self.type = self.dataP.contents.dtype
 		self.setter = dyData.getSetter(self.type)
@@ -63,12 +66,19 @@ class dyData:
 			
 	def set(self, data):
 		self.setter(self.dataP, data)
-		dy.network.push(self.name)
+                if time()-self.lastset<NETWORKINTERVAL:
+                    return
+                self.lastset = time()
+                dy.network.push(self.name)
 	
 	def get(self):
-		dy.network.pull(self.name)
-		self.data = self.getter(self.dataP)
-		return self.data
+            if time()-self.lastget<NETWORKINTERVAL:
+	        self.data = self.getter(self.dataP)
+                return self.data
+            self.lastget = time()
+            dy.network.pull(self.name)
+	    self.data = self.getter(self.dataP)
+	    return self.data
 	
 	def __str__(self):
 		return "{0}({1})".format(typetostr(self.type), self.data)

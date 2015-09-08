@@ -7,10 +7,6 @@ from numpy import array
 import pickle
 import os
 
-a = [[array([ 0.5603125,  0.2140625,  0.1925   ,  0.1303125]), 1.3133382155107036], [array([ 0.47828125,  0.31015625,  0.28625   ,  0.13578125]), 1.7078600626103295], [array([ 0.34 ,  0.275,  0.33 ,  0.185]), 2.8181672657131087], [array([ 0.39625,  0.20625,  0.38   ,  0.24125]), 2.830223576766543], [array([ 0.48306641,  0.27705078,  0.18078125,  0.20462891]), 1.357284867282448]]
-
-print a
-
 power = None
 speed = None
 paramsTested = None
@@ -19,9 +15,18 @@ tripodTime = None
 standAdjTime = None
 cpgPeriod = None
 smooth = None
+curx = None
+cury = None
+curz = None
+anglex = None
+anglez = None
+angley = None
+speedcmd = None
+turncmd = None
+pause = None
 
 def initOptimizer():
-	global power,speed,paramsTested,paramsChanged,tripodTime,standAdjTime,cpgPeriod,smooth
+	global power,speed,paramsTested,paramsChanged,tripodTime,standAdjTime,cpgPeriod,smooth,curx,cury,curz,anglex,angley,anglez,speedcmd,turncmd,pause
 	power = dyData("robot.avgpower")
 	speed = dyData("robot.avgspeed")
 	paramsTested = dyData("robot.paramstested")
@@ -30,15 +35,64 @@ def initOptimizer():
 	standAdjTime = dyData("robot.walking.params.standAdjTime")
 	cpgPeriod = dyData("robot.walking.params.cpgPeriod")
 	smooth = dyData("robot.walking.params.smooth")
+	curx = dyData("robot.position.x")
+	cury = dyData("robot.position.y")
+	curz = dyData("robot.position.z")
+	anglex = dyData("robot.angle.x")
+	angley = dyData("robot.angle.y")
+	anglez = dyData("robot.angle.z")
+        speedcmd = dyData("robot.walking.speed")
+        turncmd = dyData("robot.walking.turn")
+        pause = dyData("robot.pause")
+	
+"""
+bool turnTo(float theta)
+	{
+		return true;
+		while(theta>M_PI*2)
+			theta-=M_PI*2;
+		while(theta<-M_PI*2)
+			theta+=M_PI*2;
+		point ang = getAngle();
+		if(fabs(ang.z-theta)>.05)
+		{
+			walk->setTurnCommand(1.*(ang.z>theta?-1:1));
+			return false;
+		}
+		else
+		{
+			walk->setTurnCommand(.0);
+			return true;
+		}
+	}
+"""
+
+def goTo(target):
+	cur = getPosition()
+        flag = False
+	speedcmd.set(-1.)
+	while sum(map(lambda x,y:abs(x-y), target, cur))>.3:
+            cur = getPosition()
+            if target[1]>cur[1] and not flag:
+                break
+            elif target[1]<cur[1] and flag:
+                break
+	speedcmd.set(.0)
 
 def getPower():
 	return power.get()
-	
-def getSpeed():
-	return speed.get()	
+
+def getSpeed(start):
+	return sum(map(lambda x,y:(x-y)**2, getPosition(), start))**.5
 
 def isParamsTested():
 	return bool(paramsTested.get())
+
+def getPosition():
+	return [curx.get(), cury.get(), curz.get()]
+
+def getAngle():
+	return [anglex.get(), angley.get(), anglez.get()]
 
 def setParams(x):
 	tripodTime.set(x[0])
@@ -53,11 +107,14 @@ def costF(x):
 	m=10.
 	res=.0
 	for i in range(1):
+		startp = getPosition()
+		starta = getAngle()
 		setParams(x)
 		while not isParamsTested():
 			time.sleep(.1)
 		paramsTested.set(0.)
-		res+=getPower()/(m*g*getSpeed())
+		res+=getPower()/(m*g*getSpeed(startp))
+		goTo(startp)
 	print "Got:", res/1.
 	return res/1.	
 	
@@ -81,18 +138,20 @@ def nelder_mead(f, x_start,
 	'''
 
 	# init
-	dim = len(x_start)
-	prev_best = f(x_start)
-	no_improv = 0
-	res = [[x_start, prev_best]]
+        dim = len(x_start)
+        no_improv = 0
         if os.path.isfile("session.p"):
                 res = pickle.load(open("session.p", "rb"))
-	for i in range(dim-len(res)+1):
+                print "Found old session, resuming with", res
+        else:
+            prev_best = f(x_start)
+            res = [[x_start, prev_best]]
+        for i in range(dim-len(res)+1):
 		x = copy.copy(x_start)
 		x[i] = x[i] + step
 		score = f(x)
 		res.append([x, score])
-
+        prev_best = res[0][1]
 	# simplex iter
 	iters = 0
 	while 1:
@@ -165,8 +224,6 @@ def nelder_mead(f, x_start,
 def optimizer(argv):
 	dy.init()
 	dy.network.connect(argv[1], int(argv[2]))
-	while len(dySet('').map)==0:
-		time.sleep(.1)
 	initOptimizer()
 	print nelder_mead(costF, numpy.array([0.265, .2, .53, .11]))
 	print "DONE"
