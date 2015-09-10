@@ -144,7 +144,7 @@ void printFrames(FrameListener& frameListener)
          // Quit if the listener has no more frames.
          if( !valid )
             break;
-         std::cout << frame << std::endl;
+         // std::cout << frame << std::endl;
          
 		 sendFrameData(frame);
       }
@@ -214,9 +214,13 @@ void timeStats(FrameListener& frameListener, const float diffMin_ms = 0.5, const
 void startDY()
 {
 	dy_init(0, NULL);
-	dy_network_connect("192.168.2.51", 8650);
-	std::cout << "Waiting for variables..." << std::endl;
-	sleep(1);
+	//dy_network_connect("localhost", 8650);
+	dy_data_create(DY_FLOAT,"robot.angle.x");
+	dy_data_create(DY_FLOAT,"robot.angle.y");
+	dy_data_create(DY_FLOAT,"robot.angle.z");
+	dy_data_create(DY_FLOAT,"robot.position.x");
+	dy_data_create(DY_FLOAT,"robot.position.y");
+	dy_data_create(DY_FLOAT,"robot.position.z");
 }
 
 int main(int argc, char* argv[])

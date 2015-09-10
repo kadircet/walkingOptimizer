@@ -44,7 +44,6 @@ def initOptimizer():
         speedcmd = dyData("robot.walking.speed")
         turncmd = dyData("robot.walking.turn")
         pause = dyData("robot.pause")
-	
 """
 bool turnTo(float theta)
 	{
@@ -68,16 +67,19 @@ bool turnTo(float theta)
 """
 
 def goTo(target):
-	cur = getPosition()
-        flag = False
-	speedcmd.set(-1.)
-	while sum(map(lambda x,y:abs(x-y), target, cur))>.3:
-            cur = getPosition()
-            if target[1]>cur[1] and not flag:
-                break
-            elif target[1]<cur[1] and flag:
-                break
-	speedcmd.set(.0)
+    print "goto start with target:", target
+    cur = getPosition()
+    print "current position:", cur
+    flag = False
+    speedcmd.set(-.2)
+    while sum(map(lambda x,y:abs(x-y), target, cur))>.3:
+        cur = getPosition()
+        if target[1]>cur[1] and not flag:
+            break
+        elif target[1]<cur[1] and flag:
+            break
+    print "goto exit"
+    speedcmd.set(.0)
 
 def getPower():
 	return power.get()
@@ -116,7 +118,9 @@ def costF(x):
 		res+=getPower()/(m*g*getSpeed(startp))
 		goTo(startp)
 	print "Got:", res/1.
-	return res/1.	
+        while True:
+            time.sleep(1)
+        return res/1.	
 	
 def nelder_mead(f, x_start,
 				step=0.1, no_improve_thr=10e-6,
@@ -224,7 +228,9 @@ def nelder_mead(f, x_start,
 def optimizer(argv):
 	dy.init()
 	dy.network.connect(argv[1], int(argv[2]))
-	initOptimizer()
+        dy.network.connect("localhost", 8650)
+        time.sleep(10.)
+        initOptimizer()
 	print nelder_mead(costF, numpy.array([0.265, .2, .53, .11]))
 	print "DONE"
 

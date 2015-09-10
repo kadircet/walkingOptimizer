@@ -6,8 +6,8 @@ import threading
 tree=None
 root=None
 def refresh():
-	insertData(tree, '', dySet('').map)
-	root.after(1000, refresh)
+	insertData(tree, '', dySet('', spull=True).map)
+	root.after(100, refresh)
 
 def insertData(tree, parent, data):
 	for key in data:
@@ -61,7 +61,8 @@ def ondclick(event):
 def main(argv):
 	global tree, root
 	dy.init()
-	dy.network.connect(argv[1], int(argv[2]))
+	dy.network.connect("localhost", 8650)
+	dy.network.connect("localhost", 8651)
 	root = tk.Tk()
 	root.columnconfigure(0, weight=1)
 	root.rowconfigure(0, weight=1)
@@ -73,7 +74,7 @@ def main(argv):
 	tree.column('Value', width='200', anchor='center')
 	tree.heading('Value', text='Value')
 	tree.pack(fill=tk.BOTH, expand=1)
-	root.after(1000, refresh)
+	root.after(100, refresh)
 	root.mainloop()
 
 import sys

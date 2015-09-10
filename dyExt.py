@@ -22,11 +22,11 @@ def typetostr(dtype):
 		return "DY_DOUBLE"
 		
 class dyData:
-	def __init__(self, name, data=None, dtype=dy.DY_FLOAT):
+	def __init__(self, name, data=None, dtype=dy.DY_FLOAT, pull=False):
 		self.name = name
 		self.data = data
+                self.pull = pull
 		self.dataP = dy.data.retrieve(name)
-		self.lastget=self.lastset=time()-.5
                 if bool(self.dataP)==0:
 			self.dataP=dy.data.create(dtype, name)
 		self.type = self.dataP.contents.dtype
@@ -66,17 +66,11 @@ class dyData:
 			
 	def set(self, data):
 		self.setter(self.dataP, data)
-                if time()-self.lastset<NETWORKINTERVAL:
-                    return
-                self.lastset = time()
                 dy.network.push(self.name)
 	
 	def get(self):
-            if time()-self.lastget<NETWORKINTERVAL:
-	        self.data = self.getter(self.dataP)
-                return self.data
-            self.lastget = time()
-            dy.network.pull(self.name)
+            if self.pull:
+                dy.network.pull(self.name)
 	    self.data = self.getter(self.dataP)
 	    return self.data
 	
@@ -87,7 +81,7 @@ class dyData:
 		return "{0}({1})".format(typetostr(self.type), self.data)
 		
 class dySet:
-	def __init__(self, path='', data=None):
+	def __init__(self, path='', data=None, spull=False):
 		self.path=path
 		prefix = self.path
 		self.map = {}
@@ -107,7 +101,7 @@ class dySet:
 					self.map[elm.key]=dySet(prefix+elm.key, data)
 				else:
 					data = ctypes.cast(elm.item, dy.dy_data_p).contents
-					self.map[elm.key]=dyData(prefix+elm.key, dyData.getGetter(data.dtype)(data))
+					self.map[elm.key]=dyData(prefix+elm.key, dyData.getGetter(data.dtype)(data),pull=spull)
 					
 	def __repr__(self):
 		return str(self.map)
